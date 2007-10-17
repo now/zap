@@ -1,0 +1,33 @@
+# contents: Function that checks if a file is a regular file and is readable.
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+zmodload -i zsh/system
+
+if [[ -f $1 && -r $1 ]]; then
+  return 0
+elif (( $# > 1 )) && [[ $2 == fail ]]; then
+  if (( $# > 2 )) && [[ $3 == report ]]; then
+    local err
+    if [[ -b $1 ]]; then
+      err="Is a block special file"
+    elif [[ -c $1 ]]; then
+      err="Is a character special file"
+    elif [[ -d $1 ]]; then
+      err="Is a directory"
+    elif [[ -p $1 ]]; then
+      err="Is a fifo"
+    elif [[ -S $1 ]]; then
+      err="Is a socket"
+    elif [[ ! -e $1 || ! -f $1 || ! -r $1 ]]; then
+      syserror -e err $ERRNO
+    fi
+    zap-error 1 "can’t read file (${(L)err}):" "    file: $1"
+  else
+    exit 1
+  fi
+else
+  return 1
+fi

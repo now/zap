@@ -1,0 +1,86 @@
+# contents: Function for parsing command-line options.
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+local -a verboseoptdesc usagedesc
+verboseoptdesc=("${(P@)1}"
+  -h  --help    'display this help and exit'            ''  0 0 1
+  ''  --version 'display version information and exit'  ''  0 0 1
+)
+shift 1
+
+
+local zparsedesc
+
+for short long expl ary arg rep pos in "$verboseoptdesc[@]"; do
+  local argstr=${${rep/1/+}/0/}
+  case $arg in
+    1) argstr+=: ;;
+    2) argstr+=:: ;;
+  esac
+  (( arg > 0 )) && argstr+=\=$ary
+  long=${${long#-}%\=*}
+  short=${short#-}
+  [[ $long == -* ]] && zparsedesc+=" $long$argstr"
+  [[ $short == ? ]] && zparsedesc+=" $short$argstr"
+done
+
+eval "zparseopts -a ZAP_OPTIONS -- $zparsedesc" \
+  |& sed "s/(eval):zparseopts:1: /$ZAP_NAME: /"
+if (( $pipestatus[0] == 0 )); then
+  eval "zparseopts -a ZAP_OPTIONS -D -- $zparsedesc"
+  (( $ZAP_OPTIONS[(I)--version] )) && print -u2 -- $ZAP_NAME $ZAP_VERSION
+  if (( $ZAP_OPTIONS[(I)--help] || $ZAP_OPTIONS[(I)-h] )); then
+    integer longest=-1 baseindent
+    local head="Usage: $ZAP_NAME [OPTION]..." body= tail=
+
+    for short long desc ary arg rep pos in "$verboseoptdesc[@]"; do
+      (( ${#long} > $longest )) && (( longest = ${#long} ))
+    done
+    baseindent=$(( $longest % 8 ))
+
+    for short long desc ary arg rep pos in "$verboseoptdesc[@]"; do
+      integer indent
+      local line=
+
+      indent=$(( $baseindent + ($longest - ${#long}) + 6 ))
+      if [[ -n $short && -n $long ]]; then
+        line=$(printf "  %s, %s %*s%s" $short $long $indent " " $desc)
+      elif [[ -n $short ]]; then
+        line=$(printf "  %s   %*s%s" $short $indent " " $desc)
+      elif [[ -n $long ]]; then
+        if [[ $long == --* ]]; then
+          line=$(printf "      %s %*s%s" $long $indent " " $desc)
+        else
+          line=$(printf "  %s     %*s%s" $long $indent " " $desc)
+        fi
+      else
+        line=$desc
+      fi
+      case $pos in
+        -1) head+="$line\n" ;;
+        0) body+="$line\n" ;;
+        1) tail+="$line\n" ;;
+      esac
+    done
+
+    print -u2 -- $head
+    [[ -n $body ]] && print -u2 -- "Specific Options:\n$body"
+    print -u2 -n -- "Common Options:\n$tail"
+    exit 0
+  fi
+  (( $ZAP_OPTIONS[(I)--version] )) && exit 0
+  if (( $# > 0 )); then
+    for arg in "$@"; do
+      if [[ $arg == -? || $arg == --* ]]; then
+        zap-error c "unrecognized option:" "    option: $arg"
+        zap-try-help
+      fi
+    done
+    ZAP_ARGUMENTS=("$@")
+  fi
+else
+  zap-try-help
+fi

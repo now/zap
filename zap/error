@@ -1,0 +1,22 @@
+# contents: Function that reports an error and exits if requested.
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+local rv=$1
+
+print -u2 $ZAP_NAME: $2
+
+if (( $# > 2 )); then
+  shift 2
+  for arg in "$@"; do
+    print -u2 -- $arg
+  done
+else
+  zap-try-help
+fi
+
+if [[ $rv != c* ]]; then
+  exit $rv
+fi

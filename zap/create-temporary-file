@@ -1,0 +1,21 @@
+# contents: Function that creates a temporary file and prints its name.
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+if whence mktemp > /dev/null; then
+  local tmp
+  
+  tmp=$(mktemp -t $ZAP_NAME.XXXXXX 2>&1)
+  if (( status == 0 )); then
+    print -- $tmp
+  else
+    local file error
+
+    file=${${tmp#mktemp: cannot make temp file }%%:*}
+    error=${${tmp#mktemp: cannot make temp file }#*: }
+    zap-error 1 "can’t create temporary file ($err):" "    file: $file"
+  fi
+else
+  zap-error 1 "can’t create tempororary file (no such command):" \
+    "    command: mktemp"
+fi

@@ -1,0 +1,8 @@
+# contents: Function that prints a try --help message and exit with 1.
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+print -u2 Try ‘$ZAP_NAME --help’ for more information.
+exit 1

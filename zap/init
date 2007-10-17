@@ -1,0 +1,11 @@
+# contents: Function that initializes the Zsh Application Protocol (ZAP).
+#
+# Copyright © 2004,2005,2006 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+ZAP_NAME=$1
+ZAP_VERSION=$2
+
+autoload -U zap/try-help zap/error zap/parse-options
+autoload -U zap/file-is-regular-and-readable zap/create-temporary-file
