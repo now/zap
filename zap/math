@@ -1,0 +1,8 @@
+# contents: ZAP math functions.
+#
+# Copyright © 2007 Nikolai Weibull <now@bitwi.se>
+
+autoload -U zmathfuncdef
+
+(( $+functions[zsh_math_func_min] )) || zmathfuncdef min '$1 > $2 ? $2 : $1'
+(( $+functions[zsh_math_func_max] )) || zmathfuncdef max '$1 > $2 ? $1 : $2'

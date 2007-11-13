@@ -19,6 +19,7 @@ FILES = \
 	zap/error \
 	zap/file-is-regular-and-readable \
 	zap/init \
+	zap/math \
 	zap/parse-options \
 	zap/try-help
 
@@ -32,7 +33,7 @@ all:
 
 install: $(dest_DIRS) $(dest_FILES)
 
-$(DEST)/%:
+$(DEST)/%: %
 	$(INSTALL) --mode=644 $< $@
 
 $(dest_DIRS):
