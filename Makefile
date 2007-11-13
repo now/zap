@@ -12,7 +12,8 @@ $(error Please set up your $$fpath to include a directory in your $$HOME)
 endif
 
 DIRS = \
-       zap
+       zap \
+       zap/path
 
 FILES = \
 	zap/create-temporary-file \
@@ -21,6 +22,7 @@ FILES = \
 	zap/init \
 	zap/math \
 	zap/parse-options \
+	zap/path/common-prefix \
 	zap/try-help
 
 dest_DIRS = $(addprefix $(DEST)/,$(DIRS))

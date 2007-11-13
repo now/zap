@@ -1,0 +1,35 @@
+# contents: Function to determine the longest common prefix of a set of paths.
+#
+# Copyright © 2007 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+
+autoload -U zap/math; zap/math
+
+declare -a paths
+paths=("${(o)@}")
+
+# FIRST and LAST will be the two most diverging paths, as PATHS is the sorted
+# list of paths.
+local first=$paths[1] last=$paths[-1]
+
+integer n
+(( n = min($#first, $#last) ))
+for (( i = 1; i <= n; i++ )); do
+  if [[ $first[i] != $last[i] ]]; then
+    # Look for the rightmost ‘/’ in the range $first[1,i].  Once found, skip it
+    # if $last[i] isn’t a ‘/’.  This can actually only happen if i == 1.
+    while (( i > 0 )); do
+      if [[ $first[i] == / ]]; then
+        if [[ $last[i] != / ]]; then
+          (( i-- ))
+        fi
+        break
+      fi
+      (( i-- ))
+    done
+    print $first[1,i]
+    return
+  fi
+done
+print $first
