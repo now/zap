@@ -3,6 +3,7 @@
 # Copyright © 2007 Nikolai Weibull <now@bitwi.se>
 
 emulate -L zsh
+setopt extendedglob
 
 autoload -U zap/math; zap/math
 
