@@ -1,0 +1,122 @@
+# contents: Format list in columns.
+#
+# Copyright © 2007 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+setopt extendedglob
+
+autoload -U zap/math; zap/math
+
+# TODO: How about C:?
+declare -a opts print_opts
+declare -A params
+zparseopts -A params -D P=print_opts a=opts w:
+
+integer column_padding min_column_width
+(( column_padding = 2,
+   min_column_width = 1 + column_padding ))
+
+integer n_items max_line_width max_columns by_columns
+(( n_items = $#,
+   max_line_width = params[-w] > 0 ? params[-w] : (COLUMNS > 0 ? COLUMNS : 80),
+   max_columns = min(max(max_line_width / min_column_width, 1), n_items),
+   by_columns = opts[(I)-a] ))
+
+(( n_items == 0 )) && return
+
+# COLUMN_SET_IS_VALID keeps track of if a column set will fit in
+# max_line_width.
+#
+# LINE_WIDTHS keeps track of the line_widths of column sets.
+#
+# MAX_ITEM_WIDTHS is the bottom half of a two-dimensional vector where rows
+# are the possible column sets and the columns are the longest width of an
+# item seen in that column for the given column set.
+declare -a column_set_is_valid line_widths max_item_widths
+integer i
+for (( i = 1; i <= max_columns; i++ )); do
+  (( column_set_is_valid[i] = 1,
+     line_widths[i] = i * min_column_width ))
+
+  integer j column_set_offset
+  for (( j = 1, column_set_offset = (i - 1) * i / 2; j <= i; j++ )); do
+    (( max_item_widths[column_set_offset + j] = min_column_width ))
+  done
+done
+
+declare -a item_widths
+for (( item = 1; item <= n_items; item++ )); do
+  if (( print_opts[(I)-P] )); then
+    item_widths+=${#${(PS)item//\%{*%}}}
+  else
+    item_widths+=${#${(P)item}}
+  fi
+
+  integer i
+  for (( i = 1; i <= max_columns; i++ )); do
+    (( column_set_is_valid[i] )) || continue
+
+    integer column_set_offset column real_width max_item_width
+    (( column_set_offset = (i - 1) * i / 2,
+       column = 1 + (by_columns ?
+                     ((item - 1) % i) :
+                     ((item - 1) / ((n_items + (i - 1)) / i))),
+       real_width = item_widths[item] + (column == i ? 0 : column_padding),
+       max_item_width = max_item_widths[column_set_offset + column] ))
+
+    (( max_item_width >= real_width )) && continue
+
+    (( line_widths[i] += real_width - max_item_width,
+       max_item_widths[column_set_offset + column] = real_width,
+       column_set_is_valid[i] = line_widths[i] < max_line_width ))
+  done
+done
+
+integer columns column_set_offset
+(( columns = max(1, column_set_is_valid[(I)1]),
+   column_set_offset = (columns - 1) * columns / 2 ))
+
+if (( by_columns )); then
+  integer item_width max_item_width
+  (( item_width = item_widths[1],
+     max_item_width = max_item_widths[column_set_offset + 1] ))
+  print $=print_opts -n -- $1
+  for (( item = 2; item <= n_items; item++ )); do
+    integer column
+    (( column = 1 + (item - 1) % columns ))
+    if (( column == 1 )); then
+      print
+    else
+      print -n ${(l:max_item_width-item_width:)}
+    fi
+
+    print $=print_opts -n -- ${(P)item}
+
+    (( item_width = item_widths[item],
+       max_item_width = max_item_widths[column_set_offset + column] ))
+  done
+  print
+else
+  integer rows
+  (( rows = n_items / columns + (n_items % columns != 0) ))
+
+  integer row
+  for (( row = 1; row <= rows; row++ )); do
+    integer column=1 item=$row
+
+    while true; do
+      integer item_width max_item_width
+      (( item_width = item_widths[item],
+         max_item_width = max_item_widths[column_set_offset + column],
+         column++ ))
+
+      print $=print_opts -n -- ${(P)item}
+
+      (( item += rows ))
+      (( item > n_items )) && break
+
+      print -n ${(l:max_item_width-item_width:)}
+    done
+    print
+  done
+fi

@@ -13,12 +13,14 @@ endif
 
 DIRS = \
        zap \
+       zap/format \
        zap/path
 
 FILES = \
 	zap/create-temporary-file \
 	zap/error \
 	zap/file-is-regular-and-readable \
+	zap/format/columns \
 	zap/init \
 	zap/math \
 	zap/parse-options \
