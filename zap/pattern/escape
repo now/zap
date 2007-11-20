@@ -5,4 +5,4 @@
 emulate -L zsh
 setopt extendedglob
 
-print -- ${1//(#m)[\[\]()\\*?#<>~\^]/\\$MATCH}
+print -rn -- ${1//(#m)[\[\]()\\*?#<>~\^]/\\$MATCH}
