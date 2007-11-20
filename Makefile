@@ -14,7 +14,8 @@ endif
 DIRS = \
        zap \
        zap/format \
-       zap/path
+       zap/path \
+       zap/pattern
 
 FILES = \
 	zap/create-temporary-file \
