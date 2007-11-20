@@ -25,6 +25,7 @@ FILES = \
 	zap/math \
 	zap/parse-options \
 	zap/path/common-prefix \
+	zap/pattern/escape \
 	zap/try-help
 
 dest_DIRS = $(addprefix $(DEST)/,$(DIRS))

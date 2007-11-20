@@ -1,0 +1,8 @@
+# contents: Escape a string for inclusion in a pattern.
+#
+# Copyright © 2007 Nikolai Weibull
+
+emulate -L zsh
+setopt extendedglob
+
+print -- ${1//(#m)[\[\]()\\*?#<>~\^]/\\$MATCH}
