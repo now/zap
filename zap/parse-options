@@ -11,7 +11,6 @@ verboseoptdesc=("${(P@)1}"
 )
 shift 1
 
-
 local zparsedesc
 
 for short long expl ary arg rep pos in "$verboseoptdesc[@]"; do
@@ -20,17 +19,17 @@ for short long expl ary arg rep pos in "$verboseoptdesc[@]"; do
     1) argstr+=: ;;
     2) argstr+=:: ;;
   esac
-  (( arg > 0 )) && argstr+=\=$ary
+  (( arg > 0 )) && [[ -n $ary ]] && argstr+=\=$ary
   long=${${long#-}%\=*}
   short=${short#-}
   [[ $long == -* ]] && zparsedesc+=" $long$argstr"
   [[ $short == ? ]] && zparsedesc+=" $short$argstr"
 done
 
-eval "zparseopts -a ZAP_OPTIONS -- $zparsedesc" \
+eval "zparseopts -a ZAP_OPTIONS -A ZAP_OPTARGS -- $zparsedesc" \
   |& sed "s/(eval):zparseopts:1: /$ZAP_NAME: /"
-if (( $pipestatus[0] == 0 )); then
-  eval "zparseopts -a ZAP_OPTIONS -D -- $zparsedesc"
+if (( $pipestatus[1] == 0 )); then
+  eval "zparseopts -a ZAP_OPTIONS -A ZAP_OPTARGS -D -- $zparsedesc"
   (( $ZAP_OPTIONS[(I)--version] )) && print -u2 -- $ZAP_NAME $ZAP_VERSION
   if (( $ZAP_OPTIONS[(I)--help] || $ZAP_OPTIONS[(I)-h] )); then
     integer longest=-1 baseindent
@@ -75,12 +74,12 @@ if (( $pipestatus[0] == 0 )); then
   if (( $# > 0 )); then
     for arg in "$@"; do
       if [[ $arg == -? || $arg == --* ]]; then
-        zap-error c "unrecognized option:" "    option: $arg"
-        zap-try-help
+        zap/error c "unrecognized option:" "    option: $arg"
+        zap/try-help
       fi
     done
     ZAP_ARGUMENTS=("$@")
   fi
 else
-  zap-try-help
+  zap/try-help
 fi

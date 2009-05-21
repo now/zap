@@ -24,7 +24,7 @@ elif (( $# > 1 )) && [[ $2 == fail ]]; then
     elif [[ ! -e $1 || ! -f $1 || ! -r $1 ]]; then
       syserror -e err $ERRNO
     fi
-    zap-error 1 "can’t read file (${(L)err}):" "    file: $1"
+    zap/error 1 "can’t read file (${(L)err}):" "    file: $1"
   else
     exit 1
   fi

@@ -13,9 +13,9 @@ if whence mktemp > /dev/null; then
 
     file=${${tmp#mktemp: cannot make temp file }%%:*}
     error=${${tmp#mktemp: cannot make temp file }#*: }
-    zap-error 1 "can’t create temporary file ($err):" "    file: $file"
+    zap/error 1 "can’t create temporary file ($err):" "    file: $file"
   fi
 else
-  zap-error 1 "can’t create tempororary file (no such command):" \
+  zap/error 1 "can’t create tempororary file (no such command):" \
     "    command: mktemp"
 fi

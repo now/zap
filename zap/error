@@ -14,7 +14,7 @@ if (( $# > 2 )); then
     print -u2 -- $arg
   done
 else
-  zap-try-help
+  zap/try-help
 fi
 
 if [[ $rv != c* ]]; then

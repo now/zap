@@ -1,0 +1,24 @@
+# contents: Format list in columns.
+#
+# Copyright © 2008 Nikolai Weibull <now@bitwi.se>
+
+emulate -L zsh
+setopt extendedglob
+
+autoload -U zap/math; zap/math
+
+integer max_column_width column_width n_columns n_rows
+(( max_column_width = ${#${(O@)*//?/x}[1]},
+   column_width = max_column_width + 2,
+   n_columns = max(($COLUMNS + 1) / column_width, 1),
+   n_rows = ($# + n_columns - 1) / n_columns ))
+
+for (( i = 1; i <= n_rows; i++ )); do
+  local row=
+
+  for (( n = i; n <= $#; n += n_rows )); do
+    row+=${(r:column_width:)*[n]}
+  done
+
+  print ${row%% ##}
+done

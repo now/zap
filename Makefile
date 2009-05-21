@@ -22,6 +22,7 @@ FILES = \
 	zap/error \
 	zap/file-is-regular-and-readable \
 	zap/format/columns \
+	zap/format/simple-columns \
 	zap/init \
 	zap/math \
 	zap/parse-options \
